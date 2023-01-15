@@ -1,0 +1,65 @@
+﻿
+@page "/warehouse/list"
+@using HappyCompany.Domain.Data;
+@using HappyCompany.WebApp.Services.Interfaces;
+@inject NavigationManager UriHelper
+<div>
+    <h3 style="color:blue">Warehouses</h3>
+    <button class="btn btn-primary" style="float: right;" @onclick="() => AddWarehouse()">Add</button>
+</div>
+@if (WarehouseList == null)
+{
+    <p><em>Loading....</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Country</th>
+                <th>City</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Warehouseobj in WarehouseList)
+            {
+                <tr>
+                    <td>@Warehouseobj.Name</td>
+                    <td>@Warehouseobj.Country</td>
+                    <td>@Warehouseobj.City</td>
+                    <td>@Warehouseobj.Address</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => GetDetalis(Warehouseobj.Id)">Detalis</button>
+
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+
+    [Inject]
+    public IWareHouseService WareHouse { get; set; }
+
+    private IEnumerable<Warehouse>? WarehouseList;
+    protected override async Task  OnInitializedAsync()
+    {
+        WarehouseList = await WareHouse.GetWareHouses(); 
+    }
+    private void GetDetalis (int WarehouseId) { 
+    
+        UriHelper.NavigateTo($"Items/{WarehouseId}");
+    }
+     private void AddWarehouse () { 
+    
+        UriHelper.NavigateTo("/warehouse/Add");
+    }
+
+}

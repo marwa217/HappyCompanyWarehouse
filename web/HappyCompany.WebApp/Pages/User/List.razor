@@ -1,0 +1,77 @@
+﻿@page "/user/list"
+@using HappyCompany.WebApp.Services.Interfaces
+@using HappyCompany.Domain.Models
+
+
+<PageTitle>Users</PageTitle>
+<h1>All Users Component</h1>
+
+<p>This component show all users.</p>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Full Name</th>
+                <th>Role</th>
+                <th>Active</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@user.FullName</td>
+                    <td>@user.userRoles</td>
+                    <td>@(@user.Active ? "Active" : "InActive" )</td>
+                    <td>
+                        <NavLink href="@($"user/update/{user.Id}")" class="btn btn-link">Update</NavLink>
+                        <NavLink href="@($"user/password/{user.Id}")" class="btn btn-link">Change Password</NavLink>
+                        <button @onclick="@(() => DeleteUser(user.Id))" 
+                              class="btn btn-sm btn-danger btn-delete-user">
+                            @if (loading) 
+                            {
+                                <span class="spinner-border spinner-border-sm"></span>
+                            }
+                            else
+                            {
+                                <span>Delete</span>
+                            }
+                        </button>
+                        
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+
+
+@code {
+    private IEnumerable<UserDto>? users;
+    private bool loading;
+
+    [Inject]
+    public IUserService userService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userService.GetUsers();
+    }
+
+
+    private async void DeleteUser(string userId)
+    {
+        loading = true;
+        await userService.Delete(userId);
+        StateHasChanged();
+    }
+}

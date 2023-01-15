@@ -1,0 +1,61 @@
+﻿@page "/Items/{WarehouseId}"
+
+@using HappyCompany.WebApp.Services.Interfaces;
+@using HappyCompany.Domain.Models;
+@inject NavigationManager UriHelper
+
+<div>
+    <h3 style="color:blue">WareHouse Items</h3>
+    <button class="btn btn-primary" style="float: right;" @onclick="() => AddItem()">Add</button>
+</div>
+@if (ItemList == null)
+{
+    <p><em>Loading....</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>SKUCode</th>
+                <th>Qty</th>
+                <th>CostPrice</th>
+                <th>MSRPPrice</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in ItemList)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.SKUCode</td>
+                    <td>@item.Qty</td>
+                    <td>@item.CostPrice</td>
+                    <td>@item.MSRPPrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<br/>
+ <NavLink href="/warehouse/list">back</NavLink><br />
+
+@code {
+    [Parameter]
+    public string WarehouseId { get; set; }
+    [Inject]
+    public IItemService itemservice { get; set; }
+    private IEnumerable<Item>? ItemList;
+    protected override async Task OnInitializedAsync()
+    {
+        int.TryParse(WarehouseId, out int id);
+        ItemList = await itemservice.GetAll(id); 
+    }
+
+    private void AddItem () { 
+    
+        UriHelper.NavigateTo($"/Item/Add");
+    }
+}

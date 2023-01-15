@@ -1,0 +1,76 @@
+﻿@page "/user/update/{Id}"
+
+@using HappyCompany.WebApp.Services.Interfaces
+@using HappyCompany.Infra.Constants
+
+<div class="card">
+    <h4 class="card-header">Update User Info</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label>FullName</label>
+                <InputText @bind-Value="model.FullName" class="form-control" />
+                <ValidationMessage For="@(() => model.FullName)" />
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <InputCheckbox @bind-Value="model.Active"  class="form-control" > Status </InputCheckbox>
+              
+
+                <ValidationMessage For="@(() => model.Active)" />
+            </div>
+            <InputSelect @bind-Value="model.roleName"  class="form-control">
+                @foreach (var (key, value) in roles)
+                {
+                    <option value="@key">@value</option>
+                }
+            </InputSelect>
+            <button disabled="@loading" class="btn btn-primary">
+                @if (loading) 
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Submit
+            </button>
+            <NavLink href="user/list" class="btn btn-link">Back</NavLink>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private EditUserDto model = new EditUserDto() ;
+    private bool loading;
+    Dictionary<string, string> roles = Roles.UserRoles; 
+    [Parameter]
+    public string Id { get; set; }
+
+    [Inject]
+    public IUserService userService { get; set; }
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+    [Inject]
+    IAlertService AlertService { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await userService.GetUserDetails(Id);
+        model = new EditUserDto {FullName= user.FullName, Active = user.Active, Id= user.Id};
+
+    }
+
+    private async void OnValidSubmit()
+    {
+        model.Id = Id;
+        var result = await userService.Update(model);
+        if (result)
+        {
+            NavigationManager.NavigateTo("user/list");
+            AlertService.Success("Data Updated Successfully");
+        }
+        else
+            AlertService.Error("Error Occured");
+        
+    }
+
+}
